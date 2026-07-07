@@ -1,0 +1,166 @@
+{
+  "name": "gemini reply",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "a2b9feae-b8f3-41c1-b4c7-65efa025d1d6",
+      "name": "Gmail Trigger",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BXeDRFk7NxVTJj7b",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email assistant.\n\nReply to this exact email only:\n\"{{ $json.text }}\"\n\nRules:\n- Write only the reply\n- No subject\n- No template\n- Under 30 words"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "097b08e7-51f3-4468-a9c1-1f47bfaf57bf",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "enIZSBH2XZ6E72Zy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{$node[\"Gmail Trigger\"].json[\"id\"]}}",
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        0
+      ],
+      "id": "dd095042-3128-4c34-b461-aa42decc8193",
+      "name": "Get a message",
+      "webhookId": "35b819f7-1e37-4c9d-bd30-6fb4334afe12",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BXeDRFk7NxVTJj7b",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{$('Gmail Trigger').first().json.id}}",
+        "message": "={{ $('Message a model').first().json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "5973c7ef-166f-4310-9943-d795bac03bd6",
+      "name": "Reply to a message",
+      "webhookId": "bd149702-a1ae-4774-8286-558b4583f259",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BXeDRFk7NxVTJj7b",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0d9c48a7-e49d-4d82-99be-cf3131fcb2b8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a9371cd8f4ea07133667ca955ce50567f836a972034fecca7bdb43d2631a42e4"
+  },
+  "nodeGroups": [],
+  "id": "seEB6Xm76Bu3gpKa",
+  "tags": []
+}
