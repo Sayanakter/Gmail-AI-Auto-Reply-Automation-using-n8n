@@ -30,8 +30,6 @@ Create Gmail Draft
 
 ## Screenshots
 
-(Add workflow screenshots here)
-
 ## How to Use
 
 1. Import the workflow into n8n
